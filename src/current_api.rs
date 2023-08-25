@@ -1,5 +1,4 @@
 use std::error::Error;
-
 use reqwest::{Url, Error as ApiError, blocking};
 use serde_json::{Map, Value};
 
