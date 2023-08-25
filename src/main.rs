@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let response = current_api::coingecko_get(current_api::build_url(&asset))?;
         let (price, change_24hr) = current_api::parse_api_response(response)?;
         
-        println!("\nOUTPUT:\n Price: {}\n 24hr Change (%): {}", &price, &change_24hr);
+        println!("\nOUTPUT:\n Price: ${} USD\n 24hr Change (%): {}", &price, &change_24hr);
 
     } else { // Fetch historical price
         println!("\nINPUT:\n Asset: {:?}\n DateTime: {:?}", &asset, entry_dt.unwrap());
