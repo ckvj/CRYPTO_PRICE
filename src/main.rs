@@ -11,6 +11,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let asset: String = io::get_asset_string();
     let entry_dt =  io::get_datetime();
 
+    // Get current price (user does not enter historical date)
     if entry_dt.is_none() {
         println!("\nINPUT:\n Asset: {:?}\n Date: Now", &asset);
         
@@ -19,7 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         
         println!("\nOUTPUT:\n Price: {}\n 24hr Change (%): {}", &price, &change_24hr);
 
-    } else {
+    } else { // Fetch historical price
         println!("\nINPUT:\n Asset: {:?}\n DateTime: {:?}", &asset, entry_dt.unwrap());
         
         let response = hist_api::coingecko_get(hist_api::build_url(&asset, &(entry_dt).unwrap()))?;
