@@ -44,7 +44,7 @@ pub fn get_datetime() -> Option<NaiveDateTime> {
             Ok(dt) => return Some(dt),
             Err(_) => {
                 println!(
-                    "\nError found on input, {}\nPlease try again, or enter Q to quit",
+                    "\nError found on input, {}. Please try again, or enter Q to quit\n",
                     &input
                 );
             }
