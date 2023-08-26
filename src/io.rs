@@ -1,11 +1,11 @@
 use chrono::{NaiveDate, NaiveDateTime};
 use std::error::Error;
 
-use crate::config;
+use crate::asset;
 
 pub fn get_asset_string() -> String {
     println!("Please select asset or enter Coingecko API id. Type Q to Quit.\n");
-    config::Asset::display_enum_options();
+    asset::Asset::display_enum_options();
 
     let input = get_io_input();
 
@@ -14,8 +14,9 @@ pub fn get_asset_string() -> String {
         std::process::exit(1);
     }
 
+    // Check for valid intger or return input string
     match input.parse::<usize>() {
-        Ok(input) => match config::Asset::get_enum(input) {
+        Ok(input) => match asset::Asset::match_enum(input) {
             Some(response) => format!("{:?}", response),
             None => panic!("Provided integer not found"),
         },
@@ -26,7 +27,7 @@ pub fn get_asset_string() -> String {
 pub fn get_datetime() -> Option<NaiveDateTime> {
     loop {
         println!(
-            "Press Return for current price. Or enter DateTime in a below format:\n
+            "Press Return for current price. Or enter DateTime in a below format. 'Q' to Quit. \n
              YYYY-MM-DDTHH:MM:SS.###Z | YYYY-MM-DDTHH:MM:SSZ | YYYY-MM-DDTHH:MM:SS | YYYY-MM-DD HH:MM:SS | YYYY-MM-DD"
         );
         let input = get_io_input();

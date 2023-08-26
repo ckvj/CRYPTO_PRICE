@@ -3,6 +3,7 @@ use reqwest::{Url, Error as ApiError};
 use serde::Deserialize;
 use std::error::Error;
 
+
 #[derive(Debug, Deserialize)]
 pub struct ApiResponse {
     pub prices: Vec<(i64, f64)>,
@@ -20,15 +21,20 @@ pub fn parse_api_response(response: ApiResponse) -> Result<(NaiveDateTime, f64),
     
     if response.prices.len() > 1 {
         // Log a warning as more than one price may come up but is rare
-        println!("Warning: More than one price value found in API response");
+        eprintln!("Warning: More than one price value found in API response");
     }
     
-    let (unix_time, price) = response.prices.first().ok_or("No price data found")?;
+    let (unix_time, price) = response.prices.first().
+        ok_or("No price data found, input datetime may be before price data available")?;
+    
     let result_dt = NaiveDateTime::from_timestamp_millis(*unix_time)
         .ok_or("Error converting response to datetime")?;
     Ok((result_dt, *price))
 }
 
+// -------------
+// Build URL
+// -------------
 
 pub fn build_url(asset: &str, target_date: &NaiveDateTime) -> reqwest::Url {
     let base_url = build_base_url(asset); // Question: Why is this not borrowed?

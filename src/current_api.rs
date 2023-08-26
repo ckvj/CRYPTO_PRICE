@@ -15,6 +15,11 @@ pub fn parse_api_response(response: blocking::Response) -> Result<(f64, f64), Bo
     
     let data: Map<String, Value> = serde_json::from_str(&response.text()?)?;
     
+    // Return error for empty API 
+    if data.is_empty() {
+        return Err("Received empty API response. Likely invalid coingecko ID. Please try again".into());
+    }
+
     let (price, change_24hr) = data
         .values()
         .flat_map(|value| {
@@ -23,10 +28,15 @@ pub fn parse_api_response(response: blocking::Response) -> Result<(f64, f64), Bo
             price.zip(change_24hr)
         })
         .next()
-        .unwrap_or((0.0, 0.0));
+        .ok_or("Error processing price data found")?;
 
     Ok((price, change_24hr))
 }
+
+
+// -------------
+// Build URL
+// -------------
 
 pub fn build_url(asset: &str) -> reqwest::Url {
     let base_url = "https://api.coingecko.com/api/v3/simple/price";
@@ -36,10 +46,11 @@ pub fn build_url(asset: &str) -> reqwest::Url {
 
 pub fn build_params(asset: &str) -> Vec<(String, String)> {
     let currency = "USD".to_string();
+    let bool_24hr = "true".to_string();
 
     vec![
         ("ids".to_string(), asset.to_string().to_lowercase()),
         ("vs_currencies".to_string(), currency),
-        ("include_24hr_change".to_string(), "true".to_string()),
+        ("include_24hr_change".to_string(), bool_24hr),
     ]
 }
