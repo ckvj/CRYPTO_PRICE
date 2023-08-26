@@ -1,7 +1,7 @@
 use chrono::{NaiveDate, NaiveDateTime};
 use std::error::Error;
 
-use crate::asset;
+use crate::funcs::asset;
 
 pub fn get_asset_string() -> String {
     println!("Please select asset or enter Coingecko API id. Type Q to Quit.\n");
