@@ -1,12 +1,9 @@
 use std::error::Error;
 
-mod asset;
-mod current_api;
-mod current_api2;
-mod hist_api;
+mod funcs; 
+use funcs::io;
+use funcs::price_processor;
 
-mod io;
-mod price_processor;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let asset: String = io::get_asset_string();

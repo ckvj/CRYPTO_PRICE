@@ -1,8 +1,8 @@
 use std::error::Error;
 use chrono::NaiveDateTime;
 
-use crate::current_api;
-use crate::hist_api;
+use crate::funcs::current_api;
+use crate::funcs::hist_api;
 
 pub fn process_current_price(asset: &str) -> Result<(), Box<dyn Error>> {
     println!("\nINPUT:\n Asset: {:?}\n Date: Now", &asset);
