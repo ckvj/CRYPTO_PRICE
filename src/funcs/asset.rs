@@ -12,16 +12,14 @@ pub enum Asset {
 
 impl Asset {
     pub fn match_enum(int_input: usize) -> Option<Asset> {
-        
         let assets: Vec<Asset> = all::<Asset>().collect::<Vec<Asset>>();
         assets.get(int_input - 1).cloned() // Subtract one to get index (values started at 1)
     }
 
     pub fn display_enum_options() {
-        
         all::<Asset>()
-        .enumerate()
-        .for_each(|(count, asset)| println!("{}) {:?}", count + 1, asset));
+            .enumerate()
+            .for_each(|(count, asset)| println!("{}) {:?}", count + 1, asset));
         println!();
     }
 }

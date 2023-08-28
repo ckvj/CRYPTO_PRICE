@@ -16,10 +16,10 @@ pub fn process_current_price(asset: &str) -> Result<(), Box<dyn Error>> {
 
 }
 
-pub fn process_historical_price(asset: &str, entry_dt: &Option<NaiveDateTime>) -> Result<(), Box<dyn Error>> {
-    println!("\nINPUT:\n Asset: {:?}\n DateTime: {:?}", &asset, entry_dt.unwrap());
+pub fn process_historical_price(asset: &str, entry_dt: &NaiveDateTime) -> Result<(), Box<dyn Error>> {
+    println!("\nINPUT:\n Asset: {:?}\n DateTime: {:?}", &asset, entry_dt);
         
-    let response = hist_api::coingecko_get(hist_api::build_url(asset, &(entry_dt).unwrap()))?; // Why no need to include "&" before asset
+    let response = hist_api::coingecko_get(hist_api::build_url(asset, entry_dt))?; // Why no need to include "&" before asset
     
     let (result_dt, price) = hist_api::parse_api_response(response)?;
 

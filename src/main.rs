@@ -1,20 +1,24 @@
 use std::error::Error;
 
-mod funcs; 
-use funcs::io;
+mod funcs;
+use funcs::io_;
 use funcs::price_processor;
 
-
 fn main() -> Result<(), Box<dyn Error>> {
-    let asset: String = io::get_asset_string();
-    let entry_dt = io::get_datetime();
+    loop {
+        // let asset: String = match io_::get_asset_string() {
+        //     Err(err) => eprintln!("Error: {}", err),
+        //     Ok(asset) => asset,
+        // };
 
-    match entry_dt {
-        // Get current price (user did not enter historical date)
-        None => price_processor::process_current_price(&asset)?,
-        // Fetch historical price
-        Some(_) =>  price_processor::process_historical_price(&asset, &entry_dt)?
+        let asset: String = io_::get_asset_string()?;
+
+        match io_::get_datetime() {
+            None => price_processor::process_current_price(&asset)?,
+            Some(entry_dt) => price_processor::process_historical_price(&asset, &entry_dt)?,
+        }
+
+        // Request if user wants to retrieve another price or exit.
+        io_::check_for_repeat()?;
     }
-
-    Ok(())
 }
