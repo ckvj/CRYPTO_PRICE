@@ -1,28 +1,11 @@
+
 use chrono::{NaiveDate, NaiveDateTime};
-// use std::error::Error;
-use std::fmt::Debug;
-use thiserror::Error;
 use crate::funcs::asset;
-
-#[derive(Error, Debug)]
-pub enum IoError {
-    #[error("invalid integer, could not match integer to asset")]
-    InvalidInteger,
-    #[error("asset input cannot be empty")]
-    EmptyInput,
-    #[error("invalid input")]
-    InvalidInput,
-}
-
-
-#[derive(Error, Debug)]
-pub enum DateTimeError {
-    #[error("Unable to parse datetime")]
-    ParseError
-}
+use crate::errors_::{DateTimeError, IoError};
+use crate::output_messages as msg;
 
 pub fn get_asset_string() -> Result<String, IoError> {
-    println!("Please select asset or enter Coingecko API id. Type Q to Quit.\n");
+    println!("{}", msg::ASSET_INPUT_PROMPT);
     asset::Asset::display_enum_options();
 
     let input = match get_io_input() {
@@ -33,21 +16,18 @@ pub fn get_asset_string() -> Result<String, IoError> {
     // Check for valid intger or return input string
     match input.parse::<usize>() {
         Ok(input) => match asset::Asset::match_enum(input) {
-            Some(response) => Ok(format!("{:?}", response)),
+            Some(response) => Ok(format!("{:?}", response)), // Return asset as string
             None => Err(IoError::InvalidInteger),
         },
-        Err(_) => Ok(input), // Return input if it is not an integer for use in API
+        Err(_) => Ok(input), // Return string input if it is not an integer for use in API
     }
 }
 
 
 pub fn get_datetime() -> Option<NaiveDateTime> {
     loop {
-        println!(
-            "Press Return for current price. Or enter DateTime in a below format. 'Q' to Quit. \n
-             YYYY-MM-DDTHH:MM:SS.###Z | YYYY-MM-DDTHH:MM:SSZ | YYYY-MM-DDTHH:MM:SS | YYYY-MM-DD HH:MM:SS | YYYY-MM-DD"
-        );
-        
+        println!("{}", msg::DATETIME_INPUT_PROMPT);
+
         let input = match get_io_input() {
             None => return None,
             Some(input) => input,
@@ -56,14 +36,13 @@ pub fn get_datetime() -> Option<NaiveDateTime> {
         match parse_datetime_string(input.trim()) {
             Ok(dt) => return Some(dt),
             Err(_) => {
-                eprintln!(
-                    "\nError found on input, {}. Please try again, or enter Q to quit\n",
-                    &input
-                );
+                println!("{}. Input was: {}.", DateTimeError::ParseError, &input);
+                println!("{}", msg::TRY_AGAIN_OR_QUIT);
             }
         };
     }
 }
+
 
 fn parse_datetime_string(datetime: &str) -> Result<NaiveDateTime, DateTimeError> {
     // Common Date Formats
@@ -74,37 +53,39 @@ fn parse_datetime_string(datetime: &str) -> Result<NaiveDateTime, DateTimeError>
         "%Y-%m-%d %H:%M:%S",
     ];
 
-    // Check first if Date vs DateTime and convert if so
+    // Check first if Date vs DateTime and pad zeros if so
     if NaiveDate::parse_from_str(datetime, "%Y-%m-%d").is_ok() {
         return Ok(NaiveDateTime::parse_from_str(
             &format!("{} 00:00:00", datetime.trim()),
             "%Y-%m-%d %H:%M:%S",
-        ).unwrap());
+        )
+        .unwrap());
     }
 
     for fmt in common_formats.iter() {
-        match NaiveDateTime::parse_from_str(datetime, fmt) {
-            Ok(dt) => return Ok(dt),
-            Err(_) => continue,
-        }
+        if let Ok(dt) = NaiveDateTime::parse_from_str(datetime, fmt) { 
+            return Ok(dt)
+        } 
     }
-
+    
     Err(DateTimeError::ParseError)
 }
 
 
 pub fn check_for_repeat() -> Result<(), IoError> {
-    
-    println!("\nPress Enter (or Return) to get another price or type Q to exit\n");
-    
+    println!("{}", msg::REPEAT_PROMPT);
+
     match get_io_input() {
         None => Ok(()),
-        Some(_) => Err(IoError::InvalidInput)
+        Some(_) => {
+            println!("{}", IoError::InvalidInput);
+            println!("Restarting program");
+            Err(IoError::InvalidInput)
+        },
     }
 }
 
-
-/// Retrieve user input. Checks for quit and returns Some(value) or None if empty 
+/// Retrieve user input. Checks for quit and returns Some(value) or None if empty
 fn get_io_input() -> Option<String> {
     let mut input = String::new();
     std::io::stdin().read_line(&mut input).unwrap();
@@ -114,9 +95,8 @@ fn get_io_input() -> Option<String> {
 
     match check_for_empty(&input) {
         true => None,
-        false => Some(input)
+        false => Some(input),
     }
-
 }
 
 fn check_for_empty(input: &str) -> bool {

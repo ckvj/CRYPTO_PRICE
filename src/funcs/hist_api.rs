@@ -3,6 +3,9 @@ use reqwest::{Error as ApiError, Url};
 use serde::Deserialize;
 use std::error::Error;
 
+use crate::errors_::{ApiResponseParseError, DateTimeError};
+use crate::output_messages as msg;
+
 #[derive(Debug, Deserialize)]
 pub struct ApiResponse {
     pub prices: Vec<(i64, f64)>,
@@ -18,16 +21,24 @@ pub fn coingecko_get(url: Url) -> Result<ApiResponse, ApiError> {
 pub fn parse_api_response(response: ApiResponse) -> Result<(NaiveDateTime, f64), Box<dyn Error>> {
     if response.prices.len() > 1 {
         // Log a warning as more than one price may come up but is rare
-        eprintln!("Warning: More than one price value found in API response");
+        println!("{}", ApiResponseParseError::MultiPrice);
+        return Err(ApiResponseParseError::MultiPrice.into());
     }
 
-    let (unix_time, price) = response
+    let (unix_time, price) = match response
         .prices
         .first()
-        .ok_or("No price data found, input datetime may be before price data available")?;
+        .ok_or(ApiResponseParseError::EmptyPrice) {
+            Ok((a,b)) => (a,b),
+            Err(_) => {
+                println!("{}\n", ApiResponseParseError::EmptyPrice);
+                println!("{}\n", msg::TRY_AGAIN);
+                return Err(ApiResponseParseError::EmptyPrice.into());
+            }
+        };
 
     let result_dt = NaiveDateTime::from_timestamp_millis(*unix_time)
-        .ok_or("Error converting response to datetime")?;
+        .ok_or(DateTimeError::ConvertError)?;
     Ok((result_dt, *price))
 }
 

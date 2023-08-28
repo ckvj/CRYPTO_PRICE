@@ -1,10 +1,10 @@
 use std::error::Error;
 use reqwest::{Url, Error as ApiError, blocking};
 use serde_json::{Map, Value};
-
+use crate::errors_::ApiResponseParseError;
+use crate::output_messages as msg;
 
 pub fn coingecko_get(url: Url) -> Result<blocking::Response, ApiError> {
-    // dbg!(reqwest::blocking::get(url.clone()).unwrap());
     reqwest::blocking::get(url)
 }
 
@@ -17,7 +17,9 @@ pub fn parse_api_response(response: blocking::Response) -> Result<(f64, f64), Bo
     
     // Return error for empty API 
     if data.is_empty() {
-        return Err("Received empty API response. Likely invalid coingecko ID. Please try again".into());
+        println!("{}", ApiResponseParseError::Empty);
+        println!("{}", msg::TRY_AGAIN);
+        return Err(ApiResponseParseError::Empty.into());
     }
 
     let (price, change_24hr) = data
@@ -28,7 +30,7 @@ pub fn parse_api_response(response: blocking::Response) -> Result<(f64, f64), Bo
             price.zip(change_24hr)
         })
         .next()
-        .ok_or("Error processing price data found")?;
+        .ok_or(ApiResponseParseError::PriceParseError)?;
 
     Ok((price, change_24hr))
 }
@@ -40,8 +42,8 @@ pub fn parse_api_response(response: blocking::Response) -> Result<(f64, f64), Bo
 
 pub fn build_url(asset: &str) -> reqwest::Url {
     let base_url = "https://api.coingecko.com/api/v3/simple/price";
-    let params = build_params(asset); // Question: Why is this not borrowed?
-    Url::parse_with_params(base_url, params).unwrap() // Question: Why is this not borrowed?
+    let params = build_params(asset);
+    Url::parse_with_params(base_url, params).unwrap()
 }
 
 pub fn build_params(asset: &str) -> Vec<(String, String)> {
