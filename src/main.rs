@@ -6,12 +6,10 @@ use funcs::price_processor;
 
 fn main() -> Result<(), Box<dyn Error>> {
     loop {
-        // let asset: String = match io_::get_asset_string() {
-        //     Err(err) => eprintln!("Error: {}", err),
-        //     Ok(asset) => asset,
-        // };
-
-        let asset: String = io_::get_asset_string()?;
+        let asset: String = match io_::get_asset_string() {
+            Err(err) => eprintln!("Error: {}", err),
+            Ok(asset) => asset,
+        };
 
         match io_::get_datetime() {
             None => price_processor::process_current_price(&asset)?,
