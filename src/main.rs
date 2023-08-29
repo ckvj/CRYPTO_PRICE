@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         };
 
         match io_::get_datetime() {
-            None => match price_processor::process_current_price(&asset) {
+            None => match price_processor::process_and_display_current_price(&asset) {
                 Ok(()) => (),
                 Err(_) => continue,
             },
