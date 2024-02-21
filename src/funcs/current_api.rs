@@ -1,27 +1,33 @@
-use std::error::Error;
-use reqwest::{Url, Error as ApiError, blocking};
+use reqwest::{blocking, Error as ApiError, Url};
 use serde_json::{Map, Value};
-use crate::errors_::ApiResponseParseError;
-use crate::output_messages as msg;
 
+use super::helpers::errors_::ApiResponseParseError;
+
+/// Call coingecko API
 pub fn coingecko_get(url: Url) -> Result<blocking::Response, ApiError> {
     reqwest::blocking::get(url)
 }
 
-/// Parse CoinGecko API response for price endpoint. 
-pub fn parse_api_response(response: blocking::Response) -> Result<(f64, f64), Box<dyn Error>> {
+/// Parse coingecko API response for the 'simple/price' endpoint.
+pub fn parse_api_response(
+    response: blocking::Response,
+) -> Result<(f64, f64), ApiResponseParseError> {
     //  Since Coingecko returns the asset name as a field (eg solana), we cannot deserialize into a struct
     // directly and instead need unpack values.
-    
-    let data: Map<String, Value> = serde_json::from_str(&response.text()?)?;
-    
-    // Return error for empty API 
+
+    // Parse API response into a map
+    let response_text = response
+        .text()
+        .map_err(|_e| ApiResponseParseError::DeserializationError)?;
+    let data: Map<String, Value> = serde_json::from_str(&response_text)
+        .map_err(|_e| ApiResponseParseError::DeserializationError)?;
+
+    // Return error for empty API response
     if data.is_empty() {
-        println!("{}", ApiResponseParseError::Empty);
-        println!("{}", msg::TRY_AGAIN);
-        return Err(ApiResponseParseError::Empty.into());
+        return Err(ApiResponseParseError::Empty);
     }
 
+    // Unpack response
     let (price, change_24hr) = data
         .values()
         .flat_map(|value| {
@@ -34,7 +40,6 @@ pub fn parse_api_response(response: blocking::Response) -> Result<(f64, f64), Bo
 
     Ok((price, change_24hr))
 }
-
 
 // -------------
 // Build URL

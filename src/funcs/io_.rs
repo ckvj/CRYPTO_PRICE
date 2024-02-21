@@ -1,12 +1,13 @@
-
-use chrono::{NaiveDate, NaiveDateTime};
+use super::helpers::errors_::{DateTimeError, IoError};
+use super::helpers::strings_;
 use crate::funcs::asset;
-use crate::errors_::{DateTimeError, IoError};
-use crate::output_messages as msg;
+use chrono::{NaiveDate, NaiveDateTime};
 
 pub fn get_asset_string() -> Result<String, IoError> {
-    println!("{}", msg::ASSET_INPUT_PROMPT);
-    asset::Asset::display_enum_options();
+    println!("{}", strings_::ASSET_INPUT_PROMPT);
+
+    let asset_list = asset::AssetList::new();
+    asset_list.display_asset_selection();
 
     let input = match get_io_input() {
         None => return Err(IoError::EmptyInput),
@@ -15,18 +16,17 @@ pub fn get_asset_string() -> Result<String, IoError> {
 
     // Check for valid intger or return input string
     match input.parse::<usize>() {
-        Ok(input) => match asset::Asset::match_enum(input) {
-            Some(response) => Ok(format!("{:?}", response)), // Return asset as string
+        Ok(input) => match asset_list.match_input_to_asset(input) {
+            Some(response) => Ok(response.coingecko_id), // Return asset as string
             None => Err(IoError::InvalidInteger),
         },
         Err(_) => Ok(input), // Return string input if it is not an integer for use in API
     }
 }
 
-
 pub fn get_datetime() -> Option<NaiveDateTime> {
     loop {
-        println!("{}", msg::DATETIME_INPUT_PROMPT);
+        println!("{}", strings_::DATETIME_INPUT_PROMPT);
 
         let input = match get_io_input() {
             None => return None,
@@ -37,12 +37,11 @@ pub fn get_datetime() -> Option<NaiveDateTime> {
             Ok(dt) => return Some(dt),
             Err(_) => {
                 println!("{}. Input was: {}.", DateTimeError::ParseError, &input);
-                println!("{}", msg::TRY_AGAIN_OR_QUIT);
+                println!("{}", strings_::TRY_AGAIN_OR_QUIT);
             }
         };
     }
 }
-
 
 fn parse_datetime_string(datetime: &str) -> Result<NaiveDateTime, DateTimeError> {
     // Common Date Formats
@@ -63,17 +62,16 @@ fn parse_datetime_string(datetime: &str) -> Result<NaiveDateTime, DateTimeError>
     }
 
     for fmt in common_formats.iter() {
-        if let Ok(dt) = NaiveDateTime::parse_from_str(datetime, fmt) { 
-            return Ok(dt)
-        } 
+        if let Ok(dt) = NaiveDateTime::parse_from_str(datetime, fmt) {
+            return Ok(dt);
+        }
     }
-    
+
     Err(DateTimeError::ParseError)
 }
 
-
 pub fn check_for_repeat() -> Result<(), IoError> {
-    println!("{}", msg::REPEAT_PROMPT);
+    println!("{}", strings_::REPEAT_PROMPT);
 
     match get_io_input() {
         None => Ok(()),
@@ -81,7 +79,7 @@ pub fn check_for_repeat() -> Result<(), IoError> {
             println!("{}", IoError::InvalidInput);
             println!("Restarting program");
             Err(IoError::InvalidInput)
-        },
+        }
     }
 }
 

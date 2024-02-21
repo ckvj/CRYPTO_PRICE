@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Bitcoin",
+    "ticker": "BTC",
+    "coingecko_id": "bitcoin"
+  },
+  {
+    "name": "Ethereum",
+    "ticker": "ETH",
+    "coingecko_id": "ethereum"
+  },
+  {
+    "name": "Solana",
+    "ticker": "SOL",
+    "coingecko_id": "solana"
+  },
+  {
+    "name": "BinanceCoin",
+    "ticker": "BNB",
+    "coingecko_id": "binancecoin"
+  },
+  {
+    "name": "Sui",
+    "ticker": "SUI",
+    "coingecko_id": "sui"
+  },
+  {
+    "name": "Aptos",
+    "ticker": "APTOS",
+    "coingecko_id": "aptos"
+  },
+  {
+    "name": "Near",
+    "ticker": "NEAR",
+    "coingecko_id": "near"
+  },
+  {
+    "name": "Crown",
+    "ticker": "CROWN",
+    "coingecko_id": "crown-by-third-time-games"
+  }
+]

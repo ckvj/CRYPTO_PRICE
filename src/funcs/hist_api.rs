@@ -3,8 +3,8 @@ use reqwest::{Error as ApiError, Url};
 use serde::Deserialize;
 use std::error::Error;
 
-use crate::errors_::{ApiResponseParseError, DateTimeError};
-use crate::output_messages as msg;
+use super::helpers::errors_::{ApiResponseParseError, DateTimeError};
+use super::helpers::strings_ as msg;
 
 #[derive(Debug, Deserialize)]
 pub struct ApiResponse {

@@ -10,13 +10,12 @@ pub enum IoError {
     InvalidInput,
 }
 
-
 #[derive(Error, Debug)]
 pub enum DateTimeError {
     #[error("ERROR: Unable to parse datetime")]
     ParseError,
-    #[error("Unable to conver unix datetime into NaiveDateTime")]
-    ConvertError
+    #[error("ERROR: Unable to conver unix datetime into NaiveDateTime")]
+    ConvertError,
 }
 
 #[derive(Error, Debug)]
@@ -31,6 +30,8 @@ pub enum ApiResponseParseError {
     EmptyPrice,
 
     #[error("ERROR: Error processing price data found")]
-    PriceParseError
+    PriceParseError,
 
+    #[error("ERROR: Error Deserializing into json")]
+    DeserializationError,
 }

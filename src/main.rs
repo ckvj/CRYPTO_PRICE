@@ -1,21 +1,18 @@
 use std::error::Error;
 
 mod funcs;
+use funcs::helpers::strings_;
 use funcs::io_;
-mod output_messages;
-mod errors_;
 use funcs::price_processor;
-use output_messages as msg;
-
 
 fn main() -> Result<(), Box<dyn Error>> {
     loop {
-        println!("{}", msg::TOP_OF_PROGRAM);
+        println!("{}", strings_::TOP_OF_PROGRAM);
 
         let asset: String = match io_::get_asset_string() {
             Err(err) => {
                 println!("{}", err);
-                println!("{}", msg::TRY_AGAIN);
+                println!("{}", strings_::TRY_AGAIN);
                 continue; // Loop to top of program
             }
             Ok(asset) => asset,
@@ -33,7 +30,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
 
         // Request if user wants to retrieve another price or exit.
-        match io_::check_for_repeat(){
+        match io_::check_for_repeat() {
             Ok(()) => (),
             Err(_) => continue,
         };

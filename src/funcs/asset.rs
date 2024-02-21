@@ -1,49 +1,36 @@
-use enum_iterator::{all, Sequence};
+use serde::Deserialize;
+use serde_json;
+use std::fs;
 
-#[derive(Debug, Clone, Sequence, Copy, PartialEq)]
-pub enum Asset {
-    Bitcoin,
-    Ethereum,
-    Solana,
-    BinanceCoin,
-    Sui,
-    Aptos,
+#[derive(Deserialize, Debug, Clone)]
+pub struct Asset {
+    pub name: String,
+    pub ticker: String,
+    pub coingecko_id: String,
 }
 
-impl Asset {
-    pub fn match_enum(int_input: usize) -> Option<Asset> {
-        let assets: Vec<Asset> = all::<Asset>().collect::<Vec<Asset>>();
-        assets.get(int_input - 1).cloned() // Subtract one to get index (values started at 1)
+#[derive(Debug)]
+pub struct AssetList {
+    assets: Vec<Asset>,
+}
+
+impl AssetList {
+    pub fn new() -> Self {
+        let json_data = fs::read_to_string("assets.json").expect("Unable to read file");
+        let asset_list: Vec<Asset> =
+            serde_json::from_str(&json_data).expect("Unable to parse JSON");
+        Self { assets: asset_list }
     }
 
-    pub fn display_enum_options() {
-        all::<Asset>()
+    pub fn display_asset_selection(&self) {
+        self.assets
+            .iter()
             .enumerate()
-            .for_each(|(count, asset)| println!("{}) {:?}", count + 1, asset));
+            .for_each(|(count, asset)| println!("{}) {:?}", count + 1, asset.name));
         println!();
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use enum_iterator::{cardinality, first, last};
-
-    #[test]
-    fn test_get_enum_first() {
-        let input = 1;
-        assert_eq!(Asset::match_enum(input), first::<Asset>());
-    }
-
-    #[test]
-    fn test_get_enum_last() {
-        let input = cardinality::<Asset>();
-        assert_eq!(Asset::match_enum(input), last::<Asset>());
-    }
-
-    #[test]
-    fn test_get_enum_out_of_index() {
-        let input = cardinality::<Asset>() + 1;
-        assert_eq!(Asset::match_enum(input), None);
+    pub fn match_input_to_asset(&self, int_input: usize) -> Option<Asset> {
+        self.assets.get(int_input - 1).cloned()
     }
 }
